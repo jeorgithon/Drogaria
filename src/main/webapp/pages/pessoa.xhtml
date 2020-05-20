@@ -1,0 +1,211 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/template/template.xhtml">
+    <ui:define name="insertConteudo">
+        <h:form id="idFormTabela">
+            <p:panel header="Pessoa - Listagem">
+                <p:dataTable id="idTabela"
+                             emptyMessage="Nenhum registro encontrado"
+                             value="#{MBPessoa.listaDePessoas}"
+                             var="varPessoa"
+                             paginator="true"
+                             rows="10">
+                    <f:facet name="footer">
+                        <p:commandButton value="Novo"
+                                         update="idGrowlMensagem :idFormDialogoCadastro:idPanelGridDialogoCadastro"
+                                         actionListener="#{MBPessoa.novo()}"
+                                         oncomplete="PF('dialogoNovo').show();">
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+                    </f:facet>
+                    <p:column headerText="Nome">
+                        <h:outputText value="#{varPessoa.nome}"/>
+                    </p:column>
+                    <p:column headerText="CPF">
+                        <h:outputText value="#{varPessoa.cpf}"/>
+                    </p:column>
+                    <p:column headerText="Telefone">
+                        <h:outputText value="#{varPessoa.telefone}"/>
+                    </p:column>
+
+                    <p:column headerText="Opções">
+                        <p:commandButton icon="ui-icon-trash"
+                                         rendered="#{MBAutenticacao.permitir('A')}"
+                                         actionListener="#{MBPessoa.excluir}"
+                                         update=":idGrowlMensagem idFormTabela:idTabela"
+                                         >
+
+                            <p:confirm header="Confirmação"
+                                       message="Tem certeza que deseja excluir o produto?"
+                                       icon="ui-icon-alert"/>
+                            <!--capiura a linha atual para informar ao manargerBean.
+                            value pega a linha selecionada (no caso está guardade no atributo var)
+                            name recebe o nome para ser chamado  na função do ManageBean-->
+                            <f:attribute name="selecaoLinhaExcluir" value="#{varPessoa}"/>
+                        </p:commandButton>
+
+                        <!--Editar-->
+                        <p:commandButton icon="ui-icon-pencil"
+                                         actionListener="#{MBPessoa.editar}"
+                                         oncomplete="PF('dialogoNovo').show();"
+                                         update=":idFormDialogoCadastro:idPanelGridDialogoCadastro">
+                            <f:attribute name="selecaoLinhaEditar" value="#{varPessoa}"/>
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+
+                    </p:column>
+
+                </p:dataTable>
+            </p:panel>
+        </h:form>    
+
+        <!--Diálogo Salvar/Editar-->
+        <p:dialog header="Produto - Cadastro"
+                  widgetVar="dialogoNovo"
+                  draggable="false"
+                  resizable="false"
+                  modal="true">
+            <h:form id="idFormDialogoCadastro">
+                <p:panelGrid id="idPanelGridDialogoCadastro"
+                             columns="2">
+                    <p:outputLabel for="idTxtNome"
+                                   value="Nome"/>
+                    <p:inputText id="idTxtNome"
+                                 maxlength="50"
+                                 size="50"
+                                 value="#{MBPessoa.pessoa.nome}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - Nome."/>
+                    <p:outputLabel for="idIntCPF"
+                                   value="CPF"/>
+                    <p:inputMask id="idIntCPF"
+                                 mask="999.999.999-99"
+                                 maxlength="14"
+                                 size="16"
+                                 value="#{MBPessoa.pessoa.cpf}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - CPF."/>
+                    <p:outputLabel for="idTxtRua"
+                                   value="Rua"/>
+                    <p:inputText id="idTxtRua"
+                                 maxlength="50"
+                                 size="50"
+                                 value="#{MBPessoa.pessoa.rua}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - Rua."/>
+                    <p:outputLabel for="idTxtNumero"
+                                   value="Número"/>
+                    <p:inputText id="idTxtNumero"
+                                 maxlength="6"
+                                 size="8"
+                                 value="#{MBPessoa.pessoa.numero}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - Número."/>
+                    <p:outputLabel for="idTxtBairro"
+                                   value="Bairro"/>
+                    <p:inputText id="idTxtBairro"
+                                 maxlength="50"
+                                 size="50"
+                                 value="#{MBPessoa.pessoa.bairro}"
+                                 />
+                    <p:outputLabel for="idTxtComplemento"
+                                   value="Complemento"/>
+                    <p:inputText id="idTxtComplemento"
+                                 maxlength="50"
+                                 size="50"
+                                 value="#{MBPessoa.pessoa.complemento}"
+                                 />
+                    <p:outputLabel for="idTxtTelefone"
+                                   value="Telefone"/>
+                    <p:inputMask id="idTxtTelefone"
+                                 size="16"
+                                 mask="(99)99999-9999"
+                                 value="#{MBPessoa.pessoa.telefone}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - Telefone."/>
+                    <p:outputLabel for="idTxtCelular"
+                                   value="Celular"/>
+                    <p:inputMask id="idTxtCelular"
+                                 size="16"
+                                 mask="(99)99999-9999"
+                                 value="#{MBPessoa.pessoa.celular}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - Celular."/>
+                    <p:outputLabel for="idTxtEmail"
+                                   value="Email"/>
+                    <p:inputText id="idTxtEmail"
+                                 size="50"
+                                 maxlength="50"
+                                 value="#{MBPessoa.pessoa.email}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - Email."/>
+
+                    <p:outputLabel value="Estado"
+                                   for="idBoxEstado"/>
+                    <p:selectOneMenu id="idBoxEstado"
+                                     filter="true"
+                                     value="#{MBPessoa.estado}"
+                                     converter="omnifaces.SelectItemsConverter"
+                                     >
+                        <f:selectItem itemValue="" 
+                                      itemLabel="Selecione um Estado"/>
+                        <f:selectItems value="#{MBPessoa.listaDeEstados}"
+                                       var="varEstado"
+                                       itemValue="#{varEstado}"
+                                       itemLabel="#{varEstado.nome}"/>
+                        <p:ajax listener="#{MBPessoa.popular()}"
+                                update=":idFormDialogoCadastro:idBoxCidade :idGrowlMensagem"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="Cidade"
+                                   for="idBoxCidade"/>
+                    <p:selectOneMenu id="idBoxCidade"
+                                     filter="true"
+                                     value="#{MBPessoa.pessoa.cidade}"
+                                     converter="omnifaces.SelectItemsConverter"
+                                     required="true"
+                                     requiredMessage="CampoObrigratório - Cidade.">
+                        <f:selectItem itemValue="" 
+                                      itemLabel="Selecione uma Cidade"/>
+                        <f:selectItems value="#{MBPessoa.listaDeCidades}"
+                                       var="varCidade"
+                                       itemValue="#{varCidade}"
+                                       itemLabel="#{varCidade.nome}"/>
+                    </p:selectOneMenu>
+
+
+                </p:panelGrid>
+                <p:panelGrid columns="2">
+                    <p:commandButton value="Salvar"
+                                     update=":idGrowlMensagem idFormTabela:idTabela idFormDialogoCadastro:idPanelGridDialogoCadastro"
+                                     actionListener="#{MBPessoa.salvar()}"/>
+                    <p:commandButton value="Fechar"
+                                     process="@this"
+                                     oncomplete="PF('dialogoNovo').hide();"/>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <!--formulário para excluir um produto-->  
+        <p:confirmDialog global="true">
+            <h:form>
+                <!--styleClass é quem define se a resposta do usuário 
+                será verdadeira ou falsa-->
+                <p:commandButton value="Sim" 
+                                 type="button"
+                                 styleClass="ui-confirmdialog-yes" 
+                                 icon="ui-icon-check"/>
+                <p:commandButton value="Não"
+                                 type="Button"
+                                 styleClass="ui-confirmdialog-no"
+                                 icon="ui-icon-close"/>
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>
+

@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+    <session-factory>
+
+        <!-- Database connection settings -->
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="connection.url">jdbc:mysql://mysql.m4domotica.com.br:3306/m4domotica01</property>
+        <property name="connection.username">m4domoti01_add1</property>
+        <property name="connection.password">Entrar123</property>
+
+        <!-- pool de conexão - quantas conexões simultanias -->
+        <property name="connection.pool_size">1</property>
+
+        <!-- SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+        <!-- Enable Hibernate's automatic session context management -->
+        <property name="current_session_context_class">thread</property>
+
+        <!-- Disable the second-level cache  -->
+        <property name="cache.provider_class">org.hibernate.cache.internal.NoCacheProvider</property>
+
+        <!-- mostra o sql gerado - Debug -->
+        <property name="show_sql">true</property>
+
+        <!-- cria as tabelas -->
+        <property name="hbm2ddl.auto">update</property>
+        
+        <!--mapeamento das entdades-->
+        <mapping class= "br.com.drograria.model.Estado"/>
+        <mapping class= "br.com.drograria.model.Fabricante"/>
+        <mapping class= "br.com.drograria.model.Cidade"/>
+        <mapping class= "br.com.drograria.model.Produto"/>
+        <mapping class= "br.com.drograria.model.Pessoa"/>
+        <mapping class= "br.com.drograria.model.Cliente"/>
+        <mapping class= "br.com.drograria.model.Funcionario"/>
+        <mapping class= "br.com.drograria.model.Usuario"/>
+        <mapping class= "br.com.drograria.model.Venda"/>
+        <mapping class= "br.com.drograria.model.ItemVenda"/>
+
+    </session-factory>
+
+</hibernate-configuration>

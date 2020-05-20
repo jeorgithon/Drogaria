@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/template/template.xhtml">
+    
+    <ui:define name="insertConteudo">
+
+        <!--criação da tabela-->
+        <h:form id="idFormularioTabela">
+            <p:panel header="Estados - Listagem">
+                <p:dataTable id="idTabelaEstado"
+                             widgetVar="widgetVarTabelaEstado"
+                             value="#{MBEstado.listaDeEstados}"
+                             var="varEstado"
+                             emptyMessage="Nenhum registro encontrado"
+                             paginator="true"
+                             rows="8"
+                             paginatorPosition="bottom"
+                             filteredValue="#{MBEstado.listaDeEstadosFiltrados}">
+                    <!--Rodapé-->
+                    <f:facet name="footer">
+                        <p:commandButton value="Novo"
+                                         update="formularioSalvar:panelGridSalvar"
+                                         actionListener="#{MBEstado.init()}"
+                                         oncomplete="PF('dialogoEstadoSalvar').show();">
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+                    </f:facet>
+
+                    <!--Colunas-->
+                    <p:column headerText="Nome"
+                              sortBy="#{varEstado.nome}"
+                              filterBy="#{varEstado.nome}"
+                              filterMatchMode="contains">
+                        <h:outputText value="#{varEstado.nome}"/>
+
+                    </p:column>
+                    <p:column headerText="Sigla"
+                              sortBy="#{varEstado.sigla}"
+                              filterBy="#{varEstado.sigla}"
+                              filterMatchMode="contains">
+                        <h:outputText value="#{varEstado.sigla}"/>
+                    </p:column>
+
+                    <p:column headerText="Opções">
+                        <!--actionListener só será processado se o confirmação for positiva,
+                        caso não ele não seré processado. Na chamada de métodos, segundo o instrutor é opicional
+                        os parenteses, aqui quando usado os parentes a msg growl não funcionou.-->
+                        <p:commandButton icon="ui-icon-trash"
+                                         rendered="#{MBAutenticacao.permitir('A')}"
+                                         actionListener="#{MBEstado.excluir}"
+                                         update=":idGrowlMensagem :idFormularioTabela:idTabelaEstado">
+
+                            <p:confirm header="Confirmação"
+                                       message="Tem certeza que deseja excluir o Estado?"
+                                       icon="ui-icon-alert"/>
+                            <!--capiura a linha atual para informar ao manargerBean.
+                            value pega a linha selecionada (no caso está guardade no atributo var)
+                            name recebe o nome para ser chamado externamente-->
+                            <f:attribute name="selecaoLinhaExcluir" value="#{varEstado}"/>
+
+                        </p:commandButton>
+
+                        <!--Editar-->
+                        <p:commandButton icon="ui-icon-pencil"
+                                         actionListener="#{MBEstado.prepararEditar}"
+                                         oncomplete="PF('dialogoEstadoSalvar').show();"
+                                         update="formularioSalvar:panelGridSalvar">
+                            <f:attribute name="selecaoLinhaEditar" value="#{varEstado}"/>
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+
+                    </p:column>
+
+                </p:dataTable>
+            </p:panel>
+        </h:form>    
+
+        <!--formulário para criar e editar´um estado-->
+        <p:dialog header="Estados - Cadastro"
+                  widgetVar="dialogoEstadoSalvar"
+                  draggable="false"
+                  resizable="false"
+                  modal="true">
+            <h:form id="formularioSalvar">
+                <p:panelGrid columns="2"
+                             id="panelGridSalvar">
+                    <p:outputLabel value="Nome"
+                                   for="idTxtNome"/>
+                    <p:inputText id="idTxtNome"
+                                 maxlength="20"
+                                 size="30"
+                                 value="#{MBEstado.estado.nome}"
+                                 required="true"
+                                 requiredMessage="Campo obrigatório - Nome"/>
+
+                    <p:outputLabel value="Sigla"
+                                   for="idTxtSigla"/>
+                    <p:inputText id="idTxtSigla"
+                                 maxlength="2"
+                                 size="10"
+                                 value="#{MBEstado.estado.sigla}"
+                                 required="true"
+                                 requiredMessage="Campo obrigatório - Sigla"/>
+                </p:panelGrid>
+                <p:panelGrid columns="2">
+                    <p:commandButton value="Salvar"
+                                     actionListener="#{MBEstado.salvar()}"
+                                     update=":idGrowlMensagem formularioSalvar:panelGridSalvar :idFormularioTabela:idTabelaEstado"
+                                     />
+
+                    <p:commandButton value="Fechar"
+                                     process="@this"
+                                     oncomplete="PF('dialogoEstadoSalvar').hide();"
+                                     />
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <!--formulário para excluir um estado-->  
+        <p:confirmDialog global="true">
+            <h:form>
+                <p:commandButton value="Sim" 
+                                 type="button"
+                                 styleClass="ui-confirmdialog-yes" 
+                                 icon="ui-icon-check"/>
+                <p:commandButton value="Não"
+                                 type="Button"
+                                 styleClass="ui-confirmdialog-no"
+                                 icon="ui-icon-close"/>
+            </h:form>
+        </p:confirmDialog>
+
+
+    </ui:define>
+</ui:composition>
+

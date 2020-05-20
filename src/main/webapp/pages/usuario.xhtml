@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/template/template.xhtml">
+
+    <ui:define name="insertConteudo">
+        <h:form id="idFormTabela">
+            <p:panel header="Usuario - Listagem">
+                <p:dataTable id="idTabela"
+                             emptyMessage="Nenhum registro encontrado"
+                             value="#{MBUsuario.listaDeUsuarios}"
+                             var="varUsuario"
+                             paginator="true"
+                             rows="10">
+                    <f:facet name="footer">
+                        <p:commandButton value="Novo"
+                                         update="idGrowlMensagem :idFormDialogoCadastro:idPanelGridDialogoCadastro"
+                                         actionListener="#{MBUsuario.novo()}"
+                                         oncomplete="PF('dialogoNovo').show();">
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+                    </f:facet>
+                    <p:column headerText="Nome">
+                        <h:outputText value="#{varUsuario.pessoa.nome}"/>
+                    </p:column>
+                    <p:column headerText="CPF">
+                        <h:outputText value="#{varUsuario.pessoa.cpf}"/>
+                    </p:column>
+                    <p:column headerText="Tipo">
+                        <h:outputText value="#{varUsuario.tipoFormatado}">
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Ativo">
+                        <h:outputText value="#{varUsuario.ativoFormatado}"/>
+                    </p:column>
+
+                    <p:column headerText="Opções">
+                        <p:commandButton icon="ui-icon-trash"
+                                         actionListener="#{MBUsuario.excluir}"
+                                         update=":idGrowlMensagem idFormTabela:idTabela"
+                                         >
+
+                            <p:confirm header="Confirmação"
+                                       message="Tem certeza que deseja excluir o Usuário?"
+                                       icon="ui-icon-alert"/>
+                            <!--capiura a linha atual para informar ao manargerBean.
+                            value pega a linha selecionada (no caso está guardade no atributo var)
+                            name recebe o nome para ser chamado  na função do ManageBean-->
+                            <f:attribute name="selecaoLinhaExcluir" value="#{varUsuario}"/>
+                        </p:commandButton>
+
+                        <!--Editar-->
+                        <p:commandButton icon="ui-icon-pencil"
+                                         actionListener="#{MBUsuario.editar}"
+                                         oncomplete="PF('dialogoNovo').show();"
+                                         update=":idFormDialogoCadastro:idPanelGridDialogoCadastro">
+                            <f:attribute name="selecaoLinhaEditar" value="#{varUsuario}"/>
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+
+                    </p:column>
+
+                </p:dataTable>
+            </p:panel>
+        </h:form>    
+
+        <!--Diálogo Salvar/Editar-->
+        <p:dialog header="Cliente - Cadastro"
+                  widgetVar="dialogoNovo"
+                  draggable="false"
+                  resizable="false"
+                  modal="true">
+            <h:form id="idFormDialogoCadastro">
+                <p:panelGrid id="idPanelGridDialogoCadastro"
+                             columns="2">
+                    <p:outputLabel for="idSenha" value="Senha"/>
+                    <p:password id="idSenha"
+                                maxlength="8"
+                                size="10" 
+                                value="#{MBUsuario.usuario.senhaSemCriptogradia}"
+                                required="true"
+                                requiredMessage="Campo obrigatório - Senha."
+                                validatorMessage="Informe uma Senha com mínimo de 6 e maximo de 8 caracteres">
+                        <f:validateLength maximum="8" minimum="6"/>
+                    </p:password>
+                    <p:outputLabel for="idboxTipo"
+                                   value="Tipo"/>
+                    <p:selectOneRadio id="idboxTipo"
+                                      value="#{MBUsuario.usuario.tipo}"
+                                      required="true"
+                                      requiredMessage="Campo obrigatório - Senha.">
+                        <f:selectItem itemValue="A" 
+                                      itemLabel="Administrador"/>
+                        <f:selectItem itemValue="G" 
+                                      itemLabel="Gerente"/>
+                        <f:selectItem itemValue="B" 
+                                      itemLabel="Balconista"/>
+                    </p:selectOneRadio>
+                    <p:outputLabel value="Ativo"/>
+                    <p:selectBooleanCheckbox value="#{MBUsuario.usuario.ativo}"/>
+
+                    <p:outputLabel value="Pessoa"
+                                   for="idBoxPessoa"/>
+                    <p:selectOneMenu id="idBoxPessoa"
+                                     filter="true"
+                                     value="#{MBUsuario.usuario.pessoa}"
+                                     converter="omnifaces.SelectItemsConverter"
+                                     required="true"
+                                     requiredMessage="CampoObrigratório - Pessoa.">
+                        <f:selectItem itemValue="" 
+                                      itemLabel="Selecione uma Pessoa"/>
+                        <f:selectItems value="#{MBUsuario.listaDePesoas}"
+                                       var="varPessoa"
+                                       itemValue="#{varPessoa}"
+                                       itemLabel="#{varPessoa.nome}"/>
+                    </p:selectOneMenu>
+
+
+                </p:panelGrid>
+                <p:panelGrid columns="2">
+                    <p:commandButton value="Salvar"
+                                     update=":idGrowlMensagem idFormTabela:idTabela idFormDialogoCadastro:idPanelGridDialogoCadastro"
+                                     actionListener="#{MBUsuario.salvar()}"/>
+                    <p:commandButton value="Fechar"
+                                     process="@this"
+                                     oncomplete="PF('dialogoNovo').hide();"/>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <!--formulário para excluir-->  
+        <p:confirmDialog global="true">
+            <h:form>
+                <!--styleClass é quem define se a resposta do usuário 
+                será verdadeira ou falsa-->
+                <p:commandButton value="Sim" 
+                                 type="button"
+                                 styleClass="ui-confirmdialog-yes" 
+                                 icon="ui-icon-check"/>
+                <p:commandButton value="Não"
+                                 type="Button"
+                                 styleClass="ui-confirmdialog-no"
+                                 icon="ui-icon-close"/>
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>
+

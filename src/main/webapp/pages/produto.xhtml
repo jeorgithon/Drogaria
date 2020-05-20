@@ -1,0 +1,167 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/template/template.xhtml">
+   
+    <ui:define name="insertConteudo">    
+       
+        <h:form id="idFormTabela">
+            <p:panel header="Produto - Listagem">
+                <p:dataTable id="idTabelaProduto"
+                             emptyMessage="Nenhum registro encontrado"
+                             value="#{MBProduto.listaDeProdutos}"
+                             var="varProduto"
+                             paginator="true"
+                             rows="10">
+                    <f:facet name="footer">
+                        <p:commandButton value="Novo"
+                                         update="idGrowlMensagem :idFormDialogoCadastro:idPanelGridDialogoCadastro"
+                                         actionListener="#{MBProduto.novo()}"
+                                         oncomplete="PF('dialogoProdutoNovo').show();">
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+                    </f:facet>
+                    <p:column headerText="Descrição">
+                        <h:outputText value="#{varProduto.descricao}"/>
+                    </p:column>
+                    <p:column headerText="Quanidade">
+                        <h:outputText value="#{varProduto.quantidade}"/>
+                    </p:column>
+                    <p:column headerText="Preço">
+                        <h:outputText value="#{varProduto.preco}"/>
+                    </p:column>
+                    <p:column headerText="Fabricante">
+                        <h:outputText value="#{varProduto.fabricante.descricao}"/>
+                    </p:column>
+                    <p:column headerText="Opções">
+                        <p:commandButton icon="ui-icon-trash"
+                                         rendered="#{MBAutenticacao.permitir('A')}"
+                                         actionListener="#{MBProduto.excluir}"
+                                         update=":idGrowlMensagem idFormTabela:idTabelaProduto"
+                                         >
+
+                            <p:confirm header="Confirmação"
+                                       message="Tem certeza que deseja excluir o produto?"
+                                       icon="ui-icon-alert"/>
+                            <!--capiura a linha atual para informar ao manargerBean.
+                            value pega a linha selecionada (no caso está guardade no atributo var)
+                            name recebe o nome para ser chamado  na função do ManageBean-->
+                            <f:attribute name="selecaoLinhaExcluir" value="#{varProduto}"/>
+                        </p:commandButton>
+
+                        <!--Editar-->
+                        <p:commandButton icon="ui-icon-pencil"
+                                         actionListener="#{MBProduto.editar}"
+                                         oncomplete="PF('dialogoProdutoNovo').show();"
+                                         update=":idFormDialogoCadastro:idPanelGridDialogoCadastro">
+                            <f:attribute name="selecaoLinhaEditar" value="#{varProduto}"/>
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+
+                    </p:column>
+
+                </p:dataTable>
+            </p:panel>
+        </h:form>    
+
+        <!--Diálogo Salvar/Editar-->
+        <!--enctype="multipart/form-data"? é usando para upload de aquivo
+        consular documentação do prime faces
+        https://www.primefaces.org/docs/guide/primefaces_user_guide_6_1.pdf-->
+        <p:dialog header="Produto - Cadastro"
+                  widgetVar="dialogoProdutoNovo"
+                  draggable="false"
+                  resizable="false"
+                  modal="true">
+
+            <h:form id="idFormDialogoCadastro"
+                    enctype="multipart/form-data">
+                <p:panelGrid id="idPanelGridDialogoCadastro"
+                             columns="2">
+                    <p:outputLabel for="idTxtDescricao"
+                                   value="Descrição"/>
+                    <p:inputText id="idTxtDescricao"
+                                 maxlength="30"
+                                 size="30"
+                                 value="#{MBProduto.produto.descricao}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - Descrição."/>
+                    <p:outputLabel for="idIntQantidade"
+                                   value="Quntidade"/>
+                    <p:inputNumber id="idIntQantidade"
+                                   maxlength="20"
+                                   size="30"
+                                   value="#{MBProduto.produto.quantidade}"
+                                   required="true"
+                                   requiredMessage="CampoObrigratório - Quantidade.">
+                        <f:validateLongRange minimum="0" />
+                    </p:inputNumber> 
+                    <p:outputLabel for="idDoublePreco"
+                                   value="Preço"/>
+                    <p:inputNumber id="idDoublePreco"
+                                   maxlength="20"
+                                   size="30"
+                                   value="#{MBProduto.produto.preco}"
+                                   required="true"
+                                   requiredMessage="CampoObrigratório - Preço.">
+                        <f:validateDoubleRange minimum="0.1" />
+                    </p:inputNumber>
+
+                    <p:outputLabel for="idBoxFabricante"
+                                   value="Fabrincante"/>
+                    <p:selectOneMenu id="idBoxFabricante"
+                                     filter="true"
+                                     value="#{MBProduto.produto.fabricante}"
+                                     converter="omnifaces.SelectItemsConverter"
+                                     required="true"
+                                     requiredMessage="Campo Obrigratório - Fabricante.">
+                        <f:selectItem itemValue="" 
+                                      itemLabel="Selecione um Fabricnte"/>
+                        <f:selectItems value="#{MBProduto.listaDeFabricante}"
+                                       var="varFabricante"
+                                       itemValue="#{varFabricante}"
+                                       itemLabel="#{varFabricante.descricao}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="idFoto"
+                                   value="Foto"/>
+                    <p:fileUpload id="idFoto"
+                                  mode="advanced"
+                                  fileUploadListener="#{MBProduto.uploadDeArquivo}" 
+                                  auto="true"/>
+
+                </p:panelGrid>
+                <p:panelGrid columns="2">
+                    <p:commandButton value="Salvar"
+                                     update=":idGrowlMensagem idFormTabela:idTabelaProduto idFormDialogoCadastro:idPanelGridDialogoCadastro"
+                                     actionListener="#{MBProduto.salvar()}"/>
+                    <p:commandButton value="Fechar"
+                                     process="@this"
+                                     oncomplete="PF('dialogoProdutoNovo').hide();"/>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <!--formulário para excluir um produto-->  
+        <p:confirmDialog global="true">
+            <h:form>
+                <!--styleClass é quem define se a resposta do usuário 
+                será verdadeira ou falsa-->
+                <p:commandButton value="Sim" 
+                                 type="button"
+                                 styleClass="ui-confirmdialog-yes" 
+                                 icon="ui-icon-check"/>
+                <p:commandButton value="Não"
+                                 type="Button"
+                                 styleClass="ui-confirmdialog-no"
+                                 icon="ui-icon-close"/>
+            </h:form>
+        </p:confirmDialog>
+
+    </ui:define>
+</ui:composition>
+

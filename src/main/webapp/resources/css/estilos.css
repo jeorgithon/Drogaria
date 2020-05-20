@@ -1,0 +1,32 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 14/05/2020, 23:23:47
+    Author     : jeor_
+*/
+@charset "UTF-8";
+
+.imagemCentralizada{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    }
+    
+ .divTopo{
+    padding-bottom: 5px; 
+        
+ }
+ 
+ .botaoEntrar{
+    width: 100px;
+    margin-left: 30%;
+    text-align: justify-all;
+    padding: 15px 20px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background-color: #FCC302;
+    font-size: 18px;
+}

@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      template="/template/template.xhtml">
+    <ui:define name="insertConteudo">
+        <h:form id="idFormTabela">
+            <p:panel header="Cliente - Listagem">
+                <p:dataTable id="idTabela"
+                             emptyMessage="Nenhum registro encontrado"
+                             value="#{MBCliente.listaDeClientes}"
+                                 var="varCliente"
+                             paginator="true"
+                             rows="10">
+                    <f:facet name="footer">
+                        <p:commandButton value="Novo"
+                                         update="idGrowlMensagem :idFormDialogoCadastro:idPanelGridDialogoCadastro"
+                                         actionListener="#{MBCliente.novo()}"
+                                         oncomplete="PF('dialogoNovo').show();">
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+                    </f:facet>
+                    <p:column headerText="Nome">
+                        <h:outputText value="#{varCliente.pessoa.nome}"/>
+                    </p:column>
+                    <p:column headerText="CPF">
+                        <h:outputText value="#{varCliente.pessoa.cpf}"/>
+                    </p:column>
+                    <p:column headerText="Data do Cadastro">
+                        <h:outputText value="#{varCliente.dataDoCadastro}">
+                            <!--converte a data para o formato brasileiro-->
+                            <f:convertDateTime locale="pt_BR"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Liberado">
+                        <p:selectBooleanCheckbox disabled="true" value="#{varCliente.liberado}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Opções">
+                         <p:commandButton icon="ui-icon-trash"
+                                          rendered="#{MBAutenticacao.permitir('A')}"
+                                          actionListener="#{MBCliente.excluir}"
+                                          update=":idGrowlMensagem idFormTabela:idTabela"
+                                         >
+
+                            <p:confirm header="Confirmação"
+                                       message="Tem certeza que deseja excluir o cliente?"
+                                       icon="ui-icon-alert"/>
+                            <!--capiura a linha atual para informar ao manargerBean.
+                            value pega a linha selecionada (no caso está guardade no atributo var)
+                            name recebe o nome para ser chamado  na função do ManageBean-->
+                            <f:attribute name="selecaoLinhaExcluir" value="#{varCliente}"/>
+                        </p:commandButton>
+                        
+                        <!--Editar-->
+                        <p:commandButton icon="ui-icon-pencil"
+                                         actionListener="#{MBCliente.editar}"
+                                         oncomplete="PF('dialogoNovo').show();"
+                                         update=":idFormDialogoCadastro:idPanelGridDialogoCadastro">
+                            <f:attribute name="selecaoLinhaEditar" value="#{varCliente}"/>
+                            <f:actionListener type="org.omnifaces.eventlistener.ResetInputAjaxActionListener" />
+                        </p:commandButton>
+
+                    </p:column>
+
+                </p:dataTable>
+            </p:panel>
+        </h:form>    
+        
+        <!--Diálogo Salvar/Editar-->
+        <p:dialog header="Cliente - Cadastro"
+                  widgetVar="dialogoNovo"
+                  draggable="false"
+                  resizable="false"
+                  modal="true">
+            <h:form id="idFormDialogoCadastro">
+                <p:panelGrid id="idPanelGridDialogoCadastro"
+                             columns="2">
+                    <p:outputLabel for="idDateCadastro"
+                                   value="Data do Cadastro"/>
+                    <p:calendar id="idDateCadastro"
+                                 size="20"
+                                 value="#{MBCliente.cliente.dataDoCadastro}"
+                                 required="true"
+                                 requiredMessage="CampoObrigratório - Data do Cadastro."
+                                 locale="pt_BR"/>
+                    <p:outputLabel for="idBooleanLiberado"
+                                   value="Liberado"/>
+                    <p:selectBooleanCheckbox id="idBooleanLiberado"
+                                   value="#{MBCliente.cliente.liberado}"/>
+                    
+                                     
+                    <p:outputLabel value="Pessoa"
+                                   for="idBoxPessoa"/>
+                    <p:selectOneMenu id="idBoxPessoa"
+                                     filter="true"
+                                     value="#{MBCliente.cliente.pessoa}"
+                                     converter="omnifaces.SelectItemsConverter"
+                                     required="true"
+                                     requiredMessage="CampoObrigratório - Pessoa.">
+                        <f:selectItem itemValue="" 
+                                      itemLabel="Selecione uma Pessoa"/>
+                        <f:selectItems value="#{MBCliente.listaDePesoas}"
+                                       var="varPessoa"
+                                       itemValue="#{varPessoa}"
+                                       itemLabel="#{varPessoa.nome}"/>
+                    </p:selectOneMenu>
+
+
+                </p:panelGrid>
+                <p:panelGrid columns="2">
+                    <p:commandButton value="Salvar"
+                                     update=":idGrowlMensagem idFormTabela:idTabela idFormDialogoCadastro:idPanelGridDialogoCadastro"
+                                     actionListener="#{MBCliente.salvar()}"/>
+                    <p:commandButton value="Fechar"
+                                     process="@this"
+                                     oncomplete="PF('dialogoNovo').hide();"/>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+        
+        <!--formulário para excluir um Cliente-->  
+        <p:confirmDialog global="true">
+            <h:form>
+                <!--styleClass é quem define se a resposta do usuário 
+                será verdadeira ou falsa-->
+                <p:commandButton value="Sim" 
+                                 type="button"
+                                 styleClass="ui-confirmdialog-yes" 
+                                 icon="ui-icon-check"/>
+                <p:commandButton value="Não"
+                                 type="Button"
+                                 styleClass="ui-confirmdialog-no"
+                                 icon="ui-icon-close"/>
+            </h:form>
+        </p:confirmDialog>
+    </ui:define>
+</ui:composition>
+
